@@ -1,0 +1,27 @@
+{
+  "schema_version": "m4-review-v1",
+  "review": {
+    "effective_as_of": "2026-03-06T09:33:09+09:00",
+    "mode": "replay",
+    "input_title": "진해아트홀도서관 개관도서 MARC DB 구축 및 정리 용역",
+    "model_version": null,
+    "priority": {
+      "status": "UNAVAILABLE",
+      "label": null,
+      "rank": null,
+      "relative_score": null,
+      "reference": null,
+      "reason": "예시 데이터: M2 시점 제한 점수 미연결"
+    },
+    "search": {
+      "status": "NO_PRECEDENT",
+      "message": "비교 가능한 선례 부족",
+      "cases": []
+    },
+    "data_cutoff": null,
+    "warnings": [
+      "공개된 과거 공고를 기준으로 한 상대적인 검토 우선순위입니다. 무응찰 발생확률이나 조건 변경 효과를 뜻하지 않습니다.",
+      "유사 사례의 과업지시서 원문은 독립 검증 전입니다."
+    ]
+  }
+}

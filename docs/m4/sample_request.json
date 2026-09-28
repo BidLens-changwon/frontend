@@ -1,0 +1,27 @@
+{
+  "schema_version": "m4-review-v1",
+  "mode": "replay",
+  "as_of": "2026-01-05T17:33:39+09:00",
+  "top_k": 5,
+  "draft": {
+    "notice_id": "R26BK01259225",
+    "notice_round": "000",
+    "title": "2026년 창원시 성산구 공용차량 자동차보험 가입 용역",
+    "bid_method": "전자입찰",
+    "organization": "경상남도 창원시",
+    "contract_method": "일반경쟁",
+    "award_method": "적격심사제-보험용역 적격심사 추정가격 5억원미만",
+    "service_type": "일반용역",
+    "procurement_class_name": "자동차보험",
+    "procurement_class_code": "84131503",
+    "estimated_price_krw": 59293040,
+    "budget_krw": 59293040,
+    "bid_start_at": "2026-01-08T10:00:00+09:00",
+    "bid_close_at": "2026-01-13T10:00:00+09:00",
+    "industry_restricted": false,
+    "joint_region_restricted": false,
+    "registration_restricted": false,
+    "vat_krw": null,
+    "attachment_count": null
+  }
+}
