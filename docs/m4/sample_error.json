@@ -3,6 +3,7 @@
   "error": {
     "code": "INVALID_REQUEST",
     "message": "입찰 마감일시는 시작일시 이후여야 합니다.",
-    "details": [{"field":"draft.bid_close_at","message":"시작일시보다 늦게 입력하세요."}]
+    "details": [{"field":"draft.bid_close_at","message":"시작일시보다 늦게 입력하세요."}],
+    "request_id": "req-sample-invalid-001"
   }
 }

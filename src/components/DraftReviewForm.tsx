@@ -4,13 +4,21 @@ import {
   type ReactElement,
   type ReactNode,
   type RefObject,
+  useEffect,
   useRef,
   useState,
 } from 'react'
 import {
+  checkApiReadiness,
+  DraftReviewApiError,
+  requestDraftReview,
+} from '../api/draftReviewApi'
+import { getDraftReviewFormField } from '../api/draftReviewFieldErrors'
+import {
   M4_SCHEMA_VERSION,
   type DraftReviewInput,
   type DraftReviewRequest,
+  type DraftReviewResponse,
   type ReviewMode,
 } from '../types/m4'
 
@@ -42,6 +50,13 @@ interface FormValues {
 }
 
 type FieldErrors = Partial<Record<keyof FormValues, string>>
+
+interface SubmissionError {
+  title: string
+  message: string
+  details: string[]
+  requestId: string | null
+}
 
 interface DraftReviewFormProps {
   headingRef: RefObject<HTMLHeadingElement | null>
@@ -107,11 +122,83 @@ const displayValue = (value: unknown) => {
   return String(value)
 }
 
+const toSubmissionError = (error: unknown): SubmissionError => {
+  if (!(error instanceof DraftReviewApiError)) {
+    return {
+      title: '검토 요청을 완료하지 못했습니다',
+      message: '예상하지 못한 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+      details: [],
+      requestId: null,
+    }
+  }
+
+  const messages = {
+    INVALID_REQUEST: {
+      title: '입력 내용을 확인해 주세요',
+      message: '서버가 요청 형식 또는 필수값 오류를 확인했습니다.',
+    },
+    UNSUPPORTED_AS_OF: {
+      title: '선택한 기준시점을 사용할 수 없습니다',
+      message: '재현 가능한 과거 시점인지 확인한 뒤 다시 요청해 주세요.',
+    },
+    ANALYSIS_UNAVAILABLE: {
+      title: '현재 분석을 사용할 수 없습니다',
+      message: '분석 자료 또는 모델을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    },
+    NETWORK_ERROR: {
+      title: '서버에 연결할 수 없습니다',
+      message: '백엔드 실행 상태와 API 기본 주소를 확인해 주세요.',
+    },
+    INVALID_RESPONSE: {
+      title: '서버 응답을 확인할 수 없습니다',
+      message: '응답이 M4 계약과 일치하지 않습니다. 관리자에게 문의해 주세요.',
+    },
+    ABORTED: {
+      title: '검토 요청이 취소되었습니다',
+      message: '입력 내용은 유지됩니다.',
+    },
+  } satisfies Record<
+    DraftReviewApiError['kind'],
+    { title: string; message: string }
+  >
+
+  return {
+    ...messages[error.kind],
+    details: error.details.map(({ field, message }) => `${field}: ${message}`),
+    requestId: error.requestId,
+  }
+}
+
 function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [request, setRequest] = useState<DraftReviewRequest | null>(null)
+  const [result, setResult] = useState<DraftReviewResponse | null>(null)
+  const [submissionError, setSubmissionError] =
+    useState<SubmissionError | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const requestControllerRef = useRef<AbortController | null>(null)
+
+  const cancelRequest = () => {
+    requestControllerRef.current?.abort()
+    requestControllerRef.current = null
+    setIsSubmitting(false)
+  }
+
+  useEffect(() => () => requestControllerRef.current?.abort(), [])
+
+  const leaveReview = () => {
+    cancelRequest()
+    setSubmissionError(null)
+    setResult(null)
+    setRequest(null)
+  }
+
+  const leaveFlow = () => {
+    cancelRequest()
+    onBack()
+  }
 
   const update = (
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -120,6 +207,7 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
     const value = event.target.value
     setValues((current) => ({ ...current, [key]: value }))
     setErrors((current) => ({ ...current, [key]: undefined }))
+    setSubmissionError(null)
   }
 
   const validate = () => {
@@ -223,6 +311,109 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const submitReview = async () => {
+    if (!request || isSubmitting) return
+
+    requestControllerRef.current?.abort()
+    const controller = new AbortController()
+    requestControllerRef.current = controller
+    setSubmissionError(null)
+    setResult(null)
+    setIsSubmitting(true)
+
+    try {
+      await checkApiReadiness({ signal: controller.signal })
+      const response = await requestDraftReview(request, {
+        signal: controller.signal,
+      })
+      if (requestControllerRef.current !== controller) return
+      setResult(response)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (error) {
+      if (
+        requestControllerRef.current !== controller ||
+        (error instanceof DraftReviewApiError && error.kind === 'ABORTED')
+      ) {
+        return
+      }
+      const nextSubmissionError = toSubmissionError(error)
+      setSubmissionError(nextSubmissionError)
+
+      if (
+        error instanceof DraftReviewApiError &&
+        error.kind === 'INVALID_REQUEST'
+      ) {
+        const mappedErrors: FieldErrors = {}
+        for (const detail of error.details) {
+          const field = getDraftReviewFormField(detail.field)
+          if (field) mappedErrors[field] = detail.message
+        }
+        setErrors((current) => ({ ...current, ...mappedErrors }))
+        setRequest(null)
+        const firstField = Object.keys(mappedErrors)[0]
+        if (firstField) {
+          window.setTimeout(() => {
+            formRef.current
+              ?.querySelector<HTMLElement>(`[name="${firstField}"]`)
+              ?.focus()
+          }, 0)
+        }
+      }
+    } finally {
+      if (requestControllerRef.current === controller) {
+        requestControllerRef.current = null
+        setIsSubmitting(false)
+      }
+    }
+  }
+
+  if (result) {
+    const noPrecedent = result.review.search.status === 'NO_PRECEDENT'
+    return (
+      <main className="app-shell">
+        <AppHeader onBack={leaveFlow} />
+        <section className="result-page" aria-labelledby="result-title">
+          <p className="step-label">응답 확인</p>
+          <h1 id="result-title">검토 응답을 받았습니다</h1>
+          <p className="page-intro">
+            상세 결과 화면은 다음 단계에서 연결합니다. 현재는 M4 계약 응답 수신만 확인합니다.
+          </p>
+          <div className="result-card">
+            <p className="result-kicker">{result.review.input_title}</p>
+            <dl className="result-summary">
+              <div>
+                <dt>기준시점</dt>
+                <dd>{result.review.effective_as_of}</dd>
+              </div>
+              <div>
+                <dt>검토 우선순위 상태</dt>
+                <dd>{result.review.priority.status}</dd>
+              </div>
+              <div>
+                <dt>과거 유사사례</dt>
+                <dd>
+                  {noPrecedent
+                    ? result.review.search.message || '비교 가능한 선례 부족'
+                    : `${result.review.search.cases.length}건 수신`}
+                </dd>
+              </div>
+            </dl>
+            {noPrecedent && (
+              <p className="result-notice" role="status">
+                비교 가능한 선례가 부족한 정상 응답입니다. 오류로 처리하지 않았습니다.
+              </p>
+            )}
+          </div>
+          <div className="review-actions">
+            <button className="secondary-button" type="button" onClick={leaveReview}>
+              입력 내용 수정
+            </button>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
   if (request) {
     const rows: Array<[string, unknown]> = [
       ['검토 기준', request.mode === 'current' ? '현재 시점' : '과거 시점 재현'],
@@ -251,12 +442,12 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
 
     return (
       <main className="app-shell">
-        <AppHeader onBack={onBack} />
+        <AppHeader onBack={leaveFlow} />
         <section className="review-page" aria-labelledby="review-title">
           <p className="step-label">요청 내용 확인</p>
           <h1 id="review-title">입력한 공고 초안을 확인해 주세요</h1>
           <p className="page-intro">
-            아직 분석을 요청하지 않았습니다. 아래 내용은 API 요청 전 확인용입니다.
+            아래 내용을 확인한 뒤 검토를 요청하세요.
           </p>
           <div className="review-card">
             <dl className="review-list">
@@ -272,14 +463,20 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
             <button
               className="secondary-button"
               type="button"
-              onClick={() => setRequest(null)}
+              onClick={leaveReview}
             >
               입력 내용 수정
             </button>
-            <p className="api-note" role="note">
-              분석 요청은 백엔드 연결 이후 사용할 수 있습니다.
-            </p>
+            <button
+              className="primary-button"
+              type="button"
+              disabled={isSubmitting}
+              onClick={submitReview}
+            >
+              {isSubmitting ? '검토 요청 중…' : '검토 요청'}
+            </button>
           </div>
+          {submissionError && <RequestErrorPanel error={submissionError} />}
         </section>
       </main>
     )
@@ -287,7 +484,7 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
 
   return (
     <main className="app-shell">
-      <AppHeader onBack={onBack} />
+      <AppHeader onBack={leaveFlow} />
 
       <section className="form-page" aria-labelledby="form-title">
         <div className="page-heading">
@@ -301,6 +498,8 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
             </p>
           </div>
         </div>
+
+        {submissionError && <RequestErrorPanel error={submissionError} />}
 
         <form ref={formRef} onSubmit={handleSubmit} noValidate>
           <fieldset className="form-section mode-section">
@@ -405,6 +604,31 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
         </form>
       </section>
     </main>
+  )
+}
+
+function RequestErrorPanel({ error }: { error: SubmissionError }) {
+  return (
+    <div className="request-error" role="alert">
+      <strong>{error.title}</strong>
+      <p>{error.message}</p>
+      {error.details.length > 0 && (
+        <ul>
+          {error.details.map((detail) => <li key={detail}>{detail}</li>)}
+        </ul>
+      )}
+      {error.requestId && (
+        <label className="request-id">
+          <span>요청 ID</span>
+          <input
+            aria-label="요청 ID"
+            readOnly
+            value={error.requestId}
+            onFocus={(event) => event.currentTarget.select()}
+          />
+        </label>
+      )}
+    </div>
   )
 }
 
