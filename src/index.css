@@ -1,0 +1,175 @@
+:root {
+  font-family:
+    Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+  color: #102a2e;
+  background: #eef4f1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.landing {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  padding: 48px 24px 32px;
+  background:
+    radial-gradient(circle at 10% 12%, rgb(190 224 210 / 75%), transparent 29%),
+    radial-gradient(circle at 90% 88%, rgb(223 198 140 / 30%), transparent 26%),
+    linear-gradient(145deg, #f7faf7 0%, #eaf2ef 100%);
+}
+
+.landing::before {
+  position: absolute;
+  inset: 24px;
+  border: 1px solid rgb(16 76 75 / 12%);
+  border-radius: 28px;
+  content: "";
+  pointer-events: none;
+}
+
+.hero {
+  z-index: 1;
+  width: min(720px, 100%);
+  text-align: center;
+}
+
+.brand-mark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 30px;
+  border: 3px solid #176b67;
+  border-radius: 50%;
+}
+
+.brand-mark::after {
+  position: absolute;
+  right: -12px;
+  bottom: 0;
+  width: 28px;
+  height: 3px;
+  border-radius: 3px;
+  background: #176b67;
+  content: "";
+  transform: rotate(48deg);
+  transform-origin: left center;
+}
+
+.brand-mark span {
+  position: absolute;
+  inset: 15px;
+  border: 1px solid #d6a94f;
+  border-radius: 50%;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: #176b67;
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.28em;
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, "Noto Serif KR", serif;
+  font-size: clamp(3.4rem, 9vw, 6.5rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+h1 span {
+  display: block;
+  margin-top: 22px;
+  font-family: inherit;
+  font-size: clamp(1.25rem, 3vw, 1.8rem);
+  letter-spacing: -0.035em;
+  line-height: 1.35;
+}
+
+.description {
+  margin: 32px 0 0;
+  color: #176b67;
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-weight: 700;
+}
+
+.notice {
+  max-width: 540px;
+  margin: 20px auto 0;
+  color: #526968;
+  font-size: 0.98rem;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 36px;
+  padding: 10px 16px;
+  border: 1px solid rgb(23 107 103 / 18%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 56%);
+  color: #385a59;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d6a94f;
+  box-shadow: 0 0 0 4px rgb(214 169 79 / 16%);
+}
+
+footer {
+  position: absolute;
+  bottom: 46px;
+  color: #708482;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 560px) {
+  .landing {
+    padding-inline: 28px;
+  }
+
+  .landing::before {
+    inset: 12px;
+    border-radius: 20px;
+  }
+
+  .brand-mark {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 26px;
+  }
+
+  footer {
+    bottom: 30px;
+  }
+}
