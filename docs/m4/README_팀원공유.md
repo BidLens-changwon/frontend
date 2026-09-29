@@ -9,6 +9,7 @@
 ## API
 
 - `POST /api/v1/draft-reviews` (JSON UTF-8). 요청/정상 응답 `schema_version: "m4-review-v1"`.
+- 로컬 프론트는 `VITE_API_BASE_URL`로 백엔드 기본 주소를 받고, 기본 개발 주소는 `http://127.0.0.1:8000`이다. 검토 요청 전에 `GET /ready`가 HTTP 200이고 `components.m1`, `components.m2`, `components.m3`가 모두 `true`인지 확인한다.
 - 한 요청은 초안 하나. 수정 후 같은 API 재호출. 서버에 자동 저장하지 않음. 프론트에서 입력과 이전 결과를 보존하며 진행 중 요청은 취소할 수 있다.
 - 프론트는 금액을 정수 원화, 시간을 `YYYY-MM-DDTHH:mm:ss+09:00` ISO 8601, 제한 여부를 boolean으로 보낸다. 알 수 없는 선택 필드는 `null`; 빈 문자열, `0`, `N`을 결측 대용으로 쓰지 않는다.
 - `mode: "replay"`는 고정된 과거 시점 실험으로 `as_of`가 필수. `mode: "current"`는 서버 시각을 기준으로 하며 `as_of: null`. 백엔드가 유효 기준시점(`effective_as_of`)을 응답한다. 서버는 같은 공고의 후속 정보와 기준시점 이후 공고·첫 결과를 M3에서 제외한다.
@@ -41,6 +42,7 @@
 - `400 INVALID_REQUEST`: 형식/필수값/날짜 순서 오류. `details: [{field, message}]` 반환. 입력 보존.
 - `422 UNSUPPORTED_AS_OF`: 재현 시점의 유효성 문제. 입력 보존.
 - `503 ANALYSIS_UNAVAILABLE`: 분석 자료/모형 로딩 실패. 입력 보존 및 재시도 버튼.
+- 오류 추적 ID는 `X-Request-ID` 응답 헤더 또는 `error.request_id`로 제공할 수 있으며 프론트는 사용자가 복사할 수 있게 표시한다.
 - `200`과 `priority.status=UNAVAILABLE`: 방식 미지원 또는 기준시점의 학습 표본 부족. M3 검색은 가능한 범위에서 별도 처리.
 - `200`과 `search.status=NO_PRECEDENT`: Q04/Q08 같은 비교 선례 부족. 빈 카드 대신 부족 안내.
 - 외부 나라장터 링크 실패는 API 분석 실패와 구분. 링크 열림 자체는 사용자의 브라우저에서 외부 사이트 사정에 좌우됨.

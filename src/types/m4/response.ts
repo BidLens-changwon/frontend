@@ -49,7 +49,7 @@ export interface DraftReview {
   search: PrecedentSearch
   data_cutoff: IsoDateTime | null
   warnings: string[]
-  input?: DraftReviewInput
+  input: DraftReviewInput
 }
 
 export interface DraftReviewResponse {

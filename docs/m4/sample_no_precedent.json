@@ -22,6 +22,27 @@
     "warnings": [
       "공개된 과거 공고를 기준으로 한 상대적인 검토 우선순위입니다. 무응찰 발생확률이나 조건 변경 효과를 뜻하지 않습니다.",
       "유사 사례의 과업지시서 원문은 독립 검증 전입니다."
-    ]
+    ],
+    "input": {
+      "notice_id": null,
+      "notice_round": null,
+      "title": "진해아트홀도서관 개관도서 MARC DB 구축 및 정리 용역",
+      "bid_method": "전자입찰",
+      "organization": "경상남도 창원시 도서관사업소",
+      "contract_method": "수의계약",
+      "award_method": "제한적최저가(낙찰하한율 88%)",
+      "service_type": "일반용역",
+      "procurement_class_name": "데이터베이스 구축 서비스",
+      "procurement_class_code": null,
+      "estimated_price_krw": 52028143,
+      "budget_krw": 57230950,
+      "bid_start_at": "2026-03-09T10:00:00+09:00",
+      "bid_close_at": "2026-03-13T10:00:00+09:00",
+      "industry_restricted": null,
+      "joint_region_restricted": true,
+      "registration_restricted": null,
+      "vat_krw": null,
+      "attachment_count": null
+    }
   }
 }

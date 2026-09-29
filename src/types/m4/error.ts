@@ -14,6 +14,7 @@ export interface DraftReviewError {
   code: DraftReviewErrorCode
   message: string
   details?: DraftReviewErrorDetail[]
+  request_id?: string | null
 }
 
 export interface DraftReviewErrorResponse {
