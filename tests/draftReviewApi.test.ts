@@ -207,6 +207,15 @@ test('연결 실패를 NETWORK_ERROR로 구분하고 샘플로 대체하지 않�
   )
 })
 
+test('API 기본 주소가 없으면 분석 장애가 아닌 설정 오류로 구분한다', async () => {
+  await assert.rejects(
+    requestDraftReview(request, { baseUrl: '' }),
+    (error: unknown) =>
+      error instanceof DraftReviewApiError &&
+      error.kind === 'CONFIGURATION_ERROR',
+  )
+})
+
 test('헤더 또는 오류 본문의 요청 ID를 보존한다', async () => {
   const headerFetch: typeof fetch = async () =>
     Response.json(

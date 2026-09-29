@@ -10,6 +10,7 @@ type FetchLike = typeof fetch
 
 export type DraftReviewApiErrorKind =
   | DraftReviewErrorCode
+  | 'CONFIGURATION_ERROR'
   | 'NETWORK_ERROR'
   | 'INVALID_RESPONSE'
   | 'ABORTED'
@@ -49,6 +50,20 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const joinApiUrl = (baseUrl: string, path: string) =>
   `${baseUrl.replace(/\/$/, '')}${path}`
+
+const getApiBaseUrl = (options: RequestDraftReviewOptions) => {
+  const baseUrl =
+    options.baseUrl ?? import.meta.env?.VITE_API_BASE_URL?.trim() ?? ''
+
+  if (!baseUrl && !options.fetchImpl) {
+    throw new DraftReviewApiError(
+      'CONFIGURATION_ERROR',
+      'API 기본 주소가 설정되지 않았습니다.',
+    )
+  }
+
+  return baseUrl
+}
 
 const getHeaderRequestId = (response: Response) =>
   response.headers.get('X-Request-ID')
@@ -161,7 +176,7 @@ export const checkApiReadiness = async (
   options: RequestDraftReviewOptions = {},
 ): Promise<void> => {
   const fetchImpl = options.fetchImpl ?? fetch
-  const baseUrl = options.baseUrl ?? import.meta.env?.VITE_API_BASE_URL ?? ''
+  const baseUrl = getApiBaseUrl(options)
 
   try {
     const response = await fetchImpl(joinApiUrl(baseUrl, READY_PATH), {
@@ -210,7 +225,7 @@ export const requestDraftReview = async (
   options: RequestDraftReviewOptions = {},
 ): Promise<DraftReviewResponse> => {
   const fetchImpl = options.fetchImpl ?? fetch
-  const baseUrl = options.baseUrl ?? import.meta.env?.VITE_API_BASE_URL ?? ''
+  const baseUrl = getApiBaseUrl(options)
 
   try {
     const response = await fetchImpl(joinApiUrl(baseUrl, DRAFT_REVIEW_PATH), {
