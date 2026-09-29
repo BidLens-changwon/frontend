@@ -27,7 +27,7 @@ export interface PrecedentCase {
   similar_reason: string
   different_conditions: string
   first_bidder_count: number | null
-  opening_status: string
+  opening_status: string | null
   notice_url: string | null
   notice_published_at: IsoDateTime
   first_result_recorded_at: IsoDateTime

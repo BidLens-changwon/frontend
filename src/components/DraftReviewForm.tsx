@@ -14,6 +14,7 @@ import {
   requestDraftReview,
 } from '../api/draftReviewApi'
 import { getDraftReviewFormField } from '../api/draftReviewFieldErrors'
+import { DraftReviewResult } from './DraftReviewResult'
 import {
   M4_SCHEMA_VERSION,
   type DraftReviewInput,
@@ -133,6 +134,10 @@ const toSubmissionError = (error: unknown): SubmissionError => {
   }
 
   const messages = {
+    CONFIGURATION_ERROR: {
+      title: 'API 주소 설정이 필요합니다',
+      message: 'VITE_API_BASE_URL을 설정한 뒤 개발 서버를 다시 시작해 주세요.',
+    },
     INVALID_REQUEST: {
       title: '입력 내용을 확인해 주세요',
       message: '서버가 요청 형식 또는 필수값 오류를 확인했습니다.',
@@ -368,48 +373,10 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
   }
 
   if (result) {
-    const noPrecedent = result.review.search.status === 'NO_PRECEDENT'
     return (
       <main className="app-shell">
         <AppHeader onBack={leaveFlow} />
-        <section className="result-page" aria-labelledby="result-title">
-          <p className="step-label">응답 확인</p>
-          <h1 id="result-title">검토 응답을 받았습니다</h1>
-          <p className="page-intro">
-            상세 결과 화면은 다음 단계에서 연결합니다. 현재는 M4 계약 응답 수신만 확인합니다.
-          </p>
-          <div className="result-card">
-            <p className="result-kicker">{result.review.input_title}</p>
-            <dl className="result-summary">
-              <div>
-                <dt>기준시점</dt>
-                <dd>{result.review.effective_as_of}</dd>
-              </div>
-              <div>
-                <dt>검토 우선순위 상태</dt>
-                <dd>{result.review.priority.status}</dd>
-              </div>
-              <div>
-                <dt>과거 유사사례</dt>
-                <dd>
-                  {noPrecedent
-                    ? result.review.search.message || '비교 가능한 선례 부족'
-                    : `${result.review.search.cases.length}건 수신`}
-                </dd>
-              </div>
-            </dl>
-            {noPrecedent && (
-              <p className="result-notice" role="status">
-                비교 가능한 선례가 부족한 정상 응답입니다. 오류로 처리하지 않았습니다.
-              </p>
-            )}
-          </div>
-          <div className="review-actions">
-            <button className="secondary-button" type="button" onClick={leaveReview}>
-              입력 내용 수정
-            </button>
-          </div>
-        </section>
+        <DraftReviewResult response={result} onEdit={leaveReview} />
       </main>
     )
   }
