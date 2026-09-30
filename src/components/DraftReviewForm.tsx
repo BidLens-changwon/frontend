@@ -14,6 +14,7 @@ import {
   requestDraftReview,
 } from '../api/draftReviewApi'
 import { getDraftReviewFormField } from '../api/draftReviewFieldErrors'
+import { toKoreanIso } from '../forms/dateTime'
 import { DraftReviewResult } from './DraftReviewResult'
 import {
   M4_SCHEMA_VERSION,
@@ -106,9 +107,6 @@ const numberFields: Array<[keyof FormValues, string]> = [
   ['vatKrw', '부가세'],
   ['attachmentCount', '첨부 수'],
 ]
-
-const toKoreanIso = (value: string) =>
-  value ? `${value.length === 16 ? `${value}:00` : value}+09:00` : ''
 
 const toNullableNumber = (value: string) =>
   value.trim() === '' ? null : Number(value)
@@ -478,7 +476,7 @@ function DraftReviewForm({ headingRef, onBack }: DraftReviewFormProps) {
             <div className="field-grid compact-grid">
               {values.mode === 'replay' && (
                 <Field label="기준시점" required error={errors.asOf} hint="한국시간 기준">
-                  <input id="asOf" name="asOf" type="datetime-local" value={values.asOf} onChange={update} aria-invalid={Boolean(errors.asOf)} aria-describedby={errors.asOf ? 'asOf-error' : undefined} />
+                  <input id="asOf" name="asOf" type="datetime-local" step="1" value={values.asOf} onChange={update} aria-invalid={Boolean(errors.asOf)} aria-describedby={errors.asOf ? 'asOf-error' : undefined} />
                 </Field>
               )}
               <Field label="유사사례 수" error={errors.topK} hint="1~5건, 기본 5건">
