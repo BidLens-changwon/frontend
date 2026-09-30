@@ -13,55 +13,68 @@ button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, h1:focus-visible { outline: 3px solid #d2ab5c; outline-offset: 3px; }
 
-.landing {
-  position: relative;
+.landing-cover {
   display: grid;
   min-height: 100vh;
-  place-items: center;
-  overflow: hidden;
-  padding: 72px max(32px, calc((100vw - 1240px) / 2));
+  min-height: 100svh;
+  grid-template-rows: minmax(0, 1fr) 3px;
   background:
     radial-gradient(circle at 82% 52%, rgb(26 116 112 / 17%), transparent 26%),
     linear-gradient(125deg, #07131f 0%, #0b1b29 52%, #101d27 100%);
 }
 
-.landing::before {
-  position: absolute;
-  inset: 30px;
-  border: 1px solid rgb(145 184 181 / 14%);
-  content: "";
-  pointer-events: none;
+.landing-main {
+  display: grid;
+  align-items: center;
+  padding: clamp(56px, 8vh, 104px) clamp(48px, 5vw, 72px);
 }
 
-.landing::after {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  width: 92px;
-  height: 1px;
-  background: #c9a45a;
-  content: "";
-}
-
-.hero {
-  position: relative;
-  z-index: 1;
-  width: min(1120px, 100%);
-  margin: auto;
+.landing-content {
+  display: flex;
+  width: min(1100px, 100%);
+  align-items: center;
+  flex-direction: column;
+  margin: 0 auto;
   text-align: center;
 }
 
-.hero-copy { display: flex; max-width: 980px; align-items: center; flex-direction: column; margin: 0 auto; }
 .brand-wordmark { font-family: Georgia, "Noto Serif KR", serif; }
-.landing h1 { margin: 0; color: #f5f7f5; font-size: clamp(5rem, 11vw, 9.5rem); font-weight: 400; letter-spacing: -.07em; line-height: .82; }
-.hero-subtitle { margin: 36px 0 0; color: #a8bbb9; font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 500; letter-spacing: .01em; line-height: 1.4; }
-.hero-message { max-width: 600px; margin: 38px 0 0; color: #d6dfdd; font-size: clamp(1.15rem, 2.2vw, 1.55rem); font-weight: 450; letter-spacing: -.025em; line-height: 1.65; word-break: keep-all; }
-.hero-wordmark, .hero-subtitle, .hero-message, .landing-cta { opacity: 0; transform: translateY(14px); animation: hero-reveal .55s cubic-bezier(.22, .78, .28, 1) forwards; }
-.hero-subtitle { animation-delay: .1s; }
-.hero-message { animation-delay: .2s; }
-.landing-cta { animation-delay: .3s; }
+.landing-title {
+  margin: 0;
+  color: #f5f7f5;
+  font-size: clamp(6.25rem, 8vw, 7.5rem);
+  font-weight: 900;
+  letter-spacing: -.055em;
+  line-height: 1;
+}
 
-@keyframes hero-reveal {
+.landing-description {
+  max-width: 680px;
+  margin: clamp(24px, 2.4vw, 32px) 0 0;
+  color: #a8bbb9;
+  font-size: clamp(1.0625rem, 1.4vw, 1.125rem);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.landing-button {
+  min-height: 54px;
+  margin-top: clamp(32px, 3vw, 40px);
+  padding-inline: clamp(28px, 3vw, 36px);
+  border-color: #2f968f;
+  background: #126e69;
+  box-shadow: 0 14px 38px rgb(0 0 0 / 22%);
+}
+.landing-title, .landing-description, .landing-button {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: landing-reveal .72s cubic-bezier(.22, .78, .28, 1) forwards;
+}
+.landing-description { animation-delay: .12s; }
+.landing-button { animation-delay: .24s; }
+.landing-button:focus-visible { opacity: 1; transform: none; animation: none; }
+.landing-bottom-line { width: 100%; background: #c9a45a; }
+
+@keyframes landing-reveal {
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -71,8 +84,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .primary-button:disabled { border-color: #78918e; background: #78918e; box-shadow: none; cursor: wait; transform: none; }
 .secondary-button { border: 1px solid #bcc8c5; background: white; color: #274846; }
 .secondary-button:hover { border-color: #849b96; background: #f7f9f8; }
-.landing-cta { min-height: 54px; margin-top: 46px; padding-inline: 26px; border-color: #2f968f; background: #126e69; box-shadow: 0 14px 38px rgb(0 0 0 / 22%); }
-.landing-cta:focus-visible { opacity: 1; transform: none; animation: none; }
 
 .app-shell { min-height: 100vh; background: #f4f6f5; }
 .app-header { display: flex; min-height: 54px; align-items: center; padding: 0 max(24px, calc((100vw - 1080px) / 2)); border-bottom: 1px solid #dce3e1; background: rgb(255 255 255 / 94%); }
@@ -199,16 +210,11 @@ form { display: grid; gap: 16px; }
 .warning-panel li::marker { color: #a68135; font-weight: 850; }
 .result-edit-button { width: 100%; }
 
-@media (max-width: 880px) { .landing { padding-inline: 48px; } }
-
 @media (max-width: 720px) {
-  .landing { align-items: center; padding: 56px 28px; }
-  .landing::before { inset: 14px; }
-  .landing::after { top: 14px; left: 14px; width: 62px; }
-  .landing h1 { font-size: clamp(4rem, 22vw, 6.2rem); }
-  .hero-subtitle { margin-top: 26px; font-size: .98rem; }
-  .hero-message { margin-top: 28px; font-size: 1.08rem; }
-  .landing-cta { width: 100%; margin-top: 34px; }
+  .landing-main { padding: 48px clamp(20px, 6vw, 24px) 64px; }
+  .landing-title { font-size: clamp(3.5rem, 16vw, 4rem); }
+  .landing-description { font-size: clamp(.875rem, 4.2vw, 1rem); }
+  .landing-button { min-height: 52px; }
   .app-header { min-height: 50px; padding: 0 18px; }
   .brand-button { max-width: 100%; }
   .brand-button .brand-wordmark { display: grid; gap: 1px; }
@@ -237,5 +243,5 @@ form { display: grid; gap: 16px; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; }
-  .hero-wordmark, .hero-subtitle, .hero-message, .landing-cta { opacity: 1; transform: none; animation: none; }
+  .landing-title, .landing-description, .landing-button { opacity: 1; transform: none; animation: none; }
 }
