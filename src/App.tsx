@@ -20,22 +20,20 @@ function App() {
   }
 
   return (
-    <main className="landing">
-      <section className="hero" aria-labelledby="service-title">
-        <div className="hero-copy">
-          <h1 className="brand-wordmark hero-wordmark" id="service-title">
-            BidLens
-          </h1>
-          <p className="hero-subtitle">- 입찰 공고를 들여다보는 렌즈</p>
-          <p className="hero-message">
-            공고를 게시하기 전, 검토가 필요한 지점을 더 선명하게.
+    <main className="landing-cover">
+      <section className="landing-main" aria-labelledby="service-title">
+        <div className="landing-content">
+          <h1 className="brand-wordmark landing-title" id="service-title">BidLens</h1>
+          <p className="landing-description">
+            입찰 공고를 들여다보는 렌즈
           </p>
-          <button className="primary-button landing-cta" type="button" onClick={openForm}>
+          <button className="primary-button landing-button" type="button" onClick={openForm}>
             공고 초안 입력하기
             <span aria-hidden="true">→</span>
           </button>
         </div>
       </section>
+      <div className="landing-bottom-line" aria-hidden="true" />
     </main>
   )
 }
